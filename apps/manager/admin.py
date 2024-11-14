@@ -66,6 +66,7 @@ class UserDatabaseAdmin(ModelAdmin):
     list_filter_submit = False
     list_fullwidth = False
     actions = ['check_connection']
+    list_display = ["name", "db_type"]
 
     @action(description=_("Check connection"))
     def check_connection(self, request: HttpRequest, queryset):
@@ -84,6 +85,7 @@ class DumpTaskAdmin(ModelAdmin):
     warn_unsaved_form = True
     list_filter_submit = False
     list_fullwidth = False
+    list_display = ["id", "created_dt", "database", "file_storage", "task_period", "max_dumpfiles_keep"]
 
 
 @admin.register(DumpTaskOperation)

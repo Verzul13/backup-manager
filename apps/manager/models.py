@@ -54,7 +54,7 @@ class DumpTask(AbstractBaseModel):
     max_dumpfiles_keep = models.PositiveIntegerField("Max Dump files count to keep", default=1)
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
     class Meta:
         verbose_name = 'Dump Task'
@@ -71,7 +71,7 @@ class DumpTaskOperation(AbstractBaseModel):
     dump_path = models.CharField("Dump File Path", max_length=250, null=True, blank=True, default=None)
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
     class Meta:
         verbose_name = 'Dump Task Operation'
@@ -87,7 +87,7 @@ class RecoverBackupOperation(AbstractBaseModel):
     error_text = models.TextField("Error text", blank=True, default=None, null=True)
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
     class Meta:
         verbose_name = 'Recover Backup Operation'

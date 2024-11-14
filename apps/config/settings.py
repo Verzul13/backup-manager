@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 
+from django.templatetags.static import static
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -133,4 +135,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 UNFOLD = {
     "SITE_TITLE": "Backup Manager",
     "SITE_HEADER": "Backup Manager",
+    "LOGIN": {
+        "image": lambda request: static("manager/img/eb2e92ee45ba62cdcca3f12772ceb6a4.jpg"),
+    },
 }
