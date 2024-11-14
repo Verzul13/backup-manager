@@ -12,6 +12,7 @@ import boto3
 from botocore.exceptions import ClientError
 
 from manager.models import S3FileStorage, UserDatabase, DumpTask, DumpTaskOperation, RecoverBackupOperation
+from manager.services.databases import DB_INTERFACE 
 
 admin.site.unregister(User)
 admin.site.unregister(Group)
@@ -64,6 +65,17 @@ class UserDatabaseAdmin(ModelAdmin):
     warn_unsaved_form = True
     list_filter_submit = False
     list_fullwidth = False
+    actions = ['check_connection']
+
+    @action(description=_("Check connection"))
+    def check_connection(self, request: HttpRequest, queryset):
+        for db in queryset:
+            db_interface = DB_INTERFACE[db.db_type]
+            is_connected = db_interface.check_connection(db.connection_string)
+            if is_connected:
+                messages.success(request, f"{db.name} connection success!")
+            else:
+                messages.error(request, f"{db.name} Connection failed!")
 
 
 @admin.register(DumpTask)
