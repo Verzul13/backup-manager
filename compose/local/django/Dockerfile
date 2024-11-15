@@ -14,9 +14,8 @@ RUN apt-get update \
   && apt-get install -y netcat-openbsd \
   && apt-get install -y wkhtmltopdf \
   && apt-get install -y fonts-noto-color-emoji \
-  # pygraphviz
-#  && apt-get install -y python-pygraphviz libgraphviz-dev \
-  # cleaning up unused files
+  # Устанавливаем cron
+  && apt-get install -y cron \
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/lib/apt/lists/*
 
@@ -42,5 +41,16 @@ RUN sed -i 's/\r$//g' /start
 RUN chmod +x /start
 
 RUN mkdir -p /backup_manager/logs
+
+# Копируем cron файл
+COPY ./compose/local/django/cronfile /etc/cron.d/dump_cron
+
+# Настройка прав и установка cron
+RUN chmod 0644 /etc/cron.d/dump_cron \
+  && crontab /etc/cron.d/dump_cron \
+  && touch /var/log/cron.log
+
+# Запуск cron и вашего приложения
+CMD cron && tail -f /var/log/cron.log
 
 COPY ./apps .

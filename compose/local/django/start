@@ -4,6 +4,8 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
+# Запуск cron в фоновом режиме
+cron
 
 python manage.py collectstatic --noinput
 python manage.py migrate
