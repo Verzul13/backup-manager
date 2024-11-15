@@ -41,7 +41,7 @@ class BackupService:
         if error:
             self._set_error4operation(operation, error)
             return False, error
-
+        
         storage_service = StorageServce(storage)
         s3_file_path, error = storage_service.upload_dump(filepath, operation.id)
         if error:

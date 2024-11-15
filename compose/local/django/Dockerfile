@@ -20,6 +20,13 @@ RUN apt-get update \
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/lib/apt/lists/*
 
+# Устанавливаем clickhouse-backup
+RUN wget https://github.com/Altinity/clickhouse-backup/releases/download/v2.6.3/clickhouse-backup-linux-amd64.tar.gz \
+  && tar -zxvf clickhouse-backup-linux-amd64.tar.gz \
+  && mv build/linux/amd64/clickhouse-backup /usr/local/bin/clickhouse-backup \
+  && rm -f clickhouse-backup-linux-amd64.tar.gz \
+  && mkdir -p /etc/clickhouse-backup
+
 ENV HOME /backup_manager/
 
 # set work directory
@@ -29,11 +36,6 @@ WORKDIR $HOME
 COPY requirements.txt requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
-
-# copy entrypoint
-COPY ./compose/local/django/entrypoint /entrypoint
-RUN sed -i 's/\r$//g' /entrypoint
-RUN chmod +x /entrypoint
 
 COPY ./compose/local/django/start /start
 RUN sed -i 's/\r$//g' /start

@@ -25,7 +25,6 @@ services:
     build:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
-    entrypoint: /entrypoint
     volumes:
       - ./apps:/traderhub # только для локальной разработки
       - static_volume:/backup_manager/static

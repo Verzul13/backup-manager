@@ -102,7 +102,7 @@ class DumpTaskAdmin(ModelAdmin):
             new_operation = DumpTaskOperation.objects.create(
                 task=task,
             )
-            subprocess.Popen(["python", "manage.py", "dump_operation", new_operation.id])
+            subprocess.Popen(["python", "manage.py", "dump_operation", str(new_operation.id)])
             messages.success(request, f"{task.id}: Operation of dump created {new_operation.id}")
 
 
@@ -118,7 +118,7 @@ class DumpTaskOperationAdmin(ModelAdmin):
     @action(description=_("ReExecute dump"))
     def reexecute_dump(self, request: HttpRequest, queryset):
         for operation in queryset:
-            subprocess.Popen(["python", "manage.py", "dump_operation", operation.id])
+            subprocess.Popen(["python", "manage.py", "dump_operation", str(operation.id)])
 
 
 

@@ -20,10 +20,11 @@ class StorageServce:
     def upload_dump(self, filepath, operation_id):
         error = None
         s3_file_path = None
+        fileformat = filepath.split(".")[-1]
         try:
             self._connect()
             # Загрузка файла
-            self.s3.upload_file(filepath, self.storage_instance.bucket_name, f'dumps/{operation_id}.sql')
+            self.s3.upload_file(filepath, self.storage_instance.bucket_name, f'dumps/{operation_id}.{fileformat}')
             s3_file_path = f"dumps/{operation_id}.sql"
         except FileNotFoundError:
             error = "File not found"
