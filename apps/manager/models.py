@@ -22,6 +22,7 @@ class S3FileStorage(AbstractBaseModel):
     host = models.URLField("Host(https://host/", max_length=300)
     access_key = models.CharField("Access Key", max_length=300)
     secret_key = models.CharField("Secret Key", max_length=300)
+    bucket_name = models.CharField("Bucket Name", max_length=300, default='')
 
     def __str__(self):
         return self.name

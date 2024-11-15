@@ -5,13 +5,7 @@ from django.db import migrations
 
 
 def create_superuser(apps, schema_editor):
-    User = apps.get_model('auth', 'User')
-    username = os.getenv("ADMIN_USER", "admin")
-    password = os.getenv("ADMIN_PASSWORD", "admin")
-
-    if username and password:
-        User.objects.create_superuser(username=username, password=password)
-
+    pass
 
 class Migration(migrations.Migration):
 

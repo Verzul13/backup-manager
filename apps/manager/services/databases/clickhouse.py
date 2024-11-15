@@ -43,3 +43,6 @@ class ClickhouseService:
         except Exception as e:
             print(f"Unexpected error: {e}")
             return False
+    
+    def dump_database(self, connection_string):
+        print("connection_string", connection_string)

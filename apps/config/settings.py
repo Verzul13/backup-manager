@@ -26,7 +26,11 @@ SECRET_KEY = 'django-insecure-zq##4xr=m6rc+k*x6sck#1%_e!3#_=)0-n^9witrm^f$0d6*rc
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(os.environ.get("DEBUG", default=1)))
-ALLOWED_HOSTS: list = os.environ.get("ALLOWED_HOSTS").split(" ")
+DEFAULT_ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
+SITE_HOST = os.environ.get("SITE_HOST")
+if SITE_HOST:
+    DEFAULT_ALLOWED_HOSTS.append(SITE_HOST)
+ALLOWED_HOSTS: list = DEFAULT_ALLOWED_HOSTS
 
 
 # Application definition

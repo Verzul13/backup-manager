@@ -1,3 +1,5 @@
+import subprocess
+
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
@@ -34,7 +36,7 @@ class S3FileStorageAdmin(ModelAdmin):
     warn_unsaved_form = True
     list_filter_submit = False
     list_fullwidth = False
-    # actions_list = ["check_connection"]
+    list_display = ["name", "host", "bucket_name"]
     actions = ['check_connection']
 
     @action(description=_("Check connection"))
@@ -71,7 +73,7 @@ class UserDatabaseAdmin(ModelAdmin):
     @action(description=_("Check connection"))
     def check_connection(self, request: HttpRequest, queryset):
         for db in queryset:
-            db_interface = DB_INTERFACE[db.db_type]
+            db_interface = DB_INTERFACE[db.db_type]()
             is_connected = db_interface.check_connection(db.connection_string)
             if is_connected:
                 messages.success(request, f"{db.name} connection success!")
@@ -86,6 +88,22 @@ class DumpTaskAdmin(ModelAdmin):
     list_filter_submit = False
     list_fullwidth = False
     list_display = ["id", "created_dt", "database", "file_storage", "task_period", "max_dumpfiles_keep"]
+    actions = ['execute_dump']
+
+    @action(description=_("Execute dump"))
+    def execute_dump(self, request: HttpRequest, queryset):
+        for task in queryset:
+            db = task.database
+            db_interface = DB_INTERFACE[db.db_type]()
+            is_connected = db_interface.check_connection(db.connection_string)
+            if not is_connected:
+                messages.error(request, f"{task.id}: {db.name} Connection failed!")
+                continue
+            new_operation = DumpTaskOperation.objects.create(
+                task=task,
+            )
+            subprocess.Popen(["python", "manage.py", "dump_operation", new_operation.id])
+            messages.success(request, f"{task.id}: Operation of dump created {new_operation.id}")
 
 
 @admin.register(DumpTaskOperation)
@@ -94,6 +112,14 @@ class DumpTaskOperationAdmin(ModelAdmin):
     warn_unsaved_form = True
     list_filter_submit = False
     list_fullwidth = False
+    list_display = ["id", "created_dt", "task", "status"]
+    actions = ['reexecute_dump']
+
+    @action(description=_("ReExecute dump"))
+    def reexecute_dump(self, request: HttpRequest, queryset):
+        for operation in queryset:
+            subprocess.Popen(["python", "manage.py", "dump_operation", operation.id])
+
 
 
 @admin.register(RecoverBackupOperation)
