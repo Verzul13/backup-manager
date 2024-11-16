@@ -37,7 +37,7 @@ class S3FileStorageAdmin(ModelAdmin):
     list_filter_submit = False
     list_fullwidth = False
     list_display = ["name", "host", "bucket_name"]
-    actions = ['check_connection']
+    actions = ["check_connection"]
 
     @action(description=_("Check connection"))
     def check_connection(self, request: HttpRequest, queryset):
@@ -67,7 +67,7 @@ class UserDatabaseAdmin(ModelAdmin):
     warn_unsaved_form = True
     list_filter_submit = False
     list_fullwidth = False
-    actions = ['check_connection']
+    actions = ["check_connection"]
     list_display = ["name", "db_type"]
 
     @action(description=_("Check connection"))
@@ -118,12 +118,21 @@ class DumpTaskOperationAdmin(ModelAdmin):
     list_filter_submit = False
     list_fullwidth = False
     list_display = ["id", "created_dt", "task__database", "status"]
-    actions = ['reexecute_dump']
+    actions = ["reexecute_dump", "restore_dump"]
 
     @action(description=_("ReExecute dump"))
     def reexecute_dump(self, request: HttpRequest, queryset):
         for operation in queryset:
             subprocess.Popen(["python", "manage.py", "dump_operation", str(operation.id)])
+
+    @action(description=_("Restore dump"))
+    def restore_dump(self, request: HttpRequest, queryset):
+        for operation in queryset:
+            new_restore_operation = RecoverBackupOperation.objects.create(
+                dump_operation=operation
+            )
+            messages.success(request, _(f"Operation of restore dump created {new_restore_operation.id}"))
+            #TODO ADD Restore execute
 
 
 
@@ -133,3 +142,11 @@ class RecoverBackupOperationAdmin(ModelAdmin):
     warn_unsaved_form = True
     list_filter_submit = False
     list_fullwidth = False
+    actions = ["restore_dump"]
+    list_display = ["created_dt", "dump_operation__task__database", "dump_operation__dump_path", "status"]
+
+    @action(description=_("Restore dump"))
+    def restore_dump(self, request: HttpRequest, queryset):
+        for operation in queryset:
+            pass
+            #TODO ADD Restore execute

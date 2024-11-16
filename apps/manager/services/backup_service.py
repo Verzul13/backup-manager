@@ -1,4 +1,4 @@
-from manager.models import DumpTaskOperation
+from manager.models import DumpTaskOperation, RecoverBackupOperation
 from manager.choices import DumpOperationStatusChoices
 from manager.services.databases import DB_INTERFACE
 from manager.services.storage_service import StorageServce
@@ -75,6 +75,47 @@ class BackupService:
         if operations2delete:
             DumpTaskOperation.objects.filter(id__in=operations2delete).delete()
         print("Dump Success")
+
+    def restore_dump(self):
+        operation = RecoverBackupOperation.objects.filter(id=self.operation_id).first()
+        if not operation:
+            return False, f"Operation {self.operation_id} doesn't exist"
+        operation.status = DumpOperationStatusChoices.IN_PROCESS
+        operation.error_text = None
+        operation.save()
+
+        dump_operation = operation.dump_operation
+        db = dump_operation.task.database
+        storage = dump_operation.task.file_storage
+        if not storage.bucket_name:
+            error = "Need to add bucket name to storage"
+            self._set_error4operation(operation, error)
+            return False, error
+        db_interface = DB_INTERFACE[db.db_type]()
+        is_connected = db_interface.check_connection(db.connection_string)
+        if not is_connected:
+            error = "Database connection failed"
+            self._set_error4operation(operation, error)
+            return False, error
         
+        # DOWNLOAD DUMP
+        storage_service = StorageServce(storage)
+        filepath, error = storage_service.download_dump(dump_operation.dump_path)
+        if error:
+            self._set_error4operation(operation, error)
+            return False, error
+        # RESTORE DUMP
+        _, error = db_interface.load_dump(
+            filepath=filepath,
+            connection_string=db.connection_string
+        )
+        if error:
+            self._set_error4operation(operation, error)
+            return False, error
 
-
+        # Finilize
+        print(f"File restored successfully")
+        operation.status = DumpOperationStatusChoices.SUCCESS
+        operation.error_text = None
+        operation.save()
+        return True, None

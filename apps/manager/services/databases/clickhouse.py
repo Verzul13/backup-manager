@@ -56,15 +56,9 @@ class ClickhouseService:
         except Exception as e:
             print(f"Unexpected error: {e}")
             return False
-    
-    def dump_database(self, connection_string, operation_id):
-        file_name = f"dump_{operation_id}"
-        folder_prefix = "/var/lib/clickhouse/backup/"
-        backup_path = os.path.join(folder_prefix, file_name)
-        zip_file_path = f"/tmp/{file_name}.zip"
 
+    def _create_config(self, connection_string):
         user, password, host, port, database = self.parse_connection_string(connection_string)
-        # command = f"clickhouse-backup create {file_name} --clickhouse-host {host} --clickhouse-port {port} --clickhouse-user {user} --clickhouse-password {password} --clickhouse-database {database}"
         # Динамически создаём временный конфиг
         config_content = f"""
 clickhouse:
@@ -93,6 +87,17 @@ s3:
                 temp_config.write(config_content.encode())
         except Exception as e:
             return None, f"Error cretate temp config: {e}"
+        return config_file_path, None
+    
+    def dump_database(self, connection_string, operation_id):
+        file_name = f"dump_{operation_id}"
+        folder_prefix = "/var/lib/clickhouse/backup/"
+        backup_path = os.path.join(folder_prefix, file_name)
+        zip_file_path = f"/tmp/{file_name}.zip"
+
+        config_file_path, error = self._create_config(connection_string)
+        if error:
+            return None, error
 
         try:
             command = f"clickhouse-backup create {file_name} --config {config_file_path}"
@@ -117,3 +122,33 @@ s3:
             return None, f"Error zipping or cleaning up: {e}"
 
         return zip_file_path, None
+    
+    def load_dump(self, connection_string, filepath):
+        """Загрузка дампа в ClickHouse из zip-архива."""
+        file_name = os.path.basename(filepath).replace(".zip", "")
+        folder_prefix = "/var/lib/clickhouse/backup/"
+        backup_path = os.path.join(folder_prefix, file_name)
+
+        config_file_path, error = self._create_config(connection_string)
+        if error:
+            return False, error
+        # Распаковываем архив в /var/lib/clickhouse/backup
+        try:
+            with zipfile.ZipFile(filepath, 'r') as zip_ref:
+                zip_ref.extractall(backup_path)
+        except Exception as e:
+            os.remove(config_file_path)
+            return False, f"Error extracting zip file: {e}"
+
+        # Выполняем команду восстановления дампа
+        try:
+            command = f"clickhouse-backup restore {file_name} --config {config_file_path} --data"
+            subprocess.run(command, shell=True, check=True)
+        except subprocess.CalledProcessError as e:
+            return False, f"Error restoring backup: {e}"
+        finally:
+            # Удаляем временный файл конфигурации
+            os.remove(config_file_path)
+            # Удаляем папку с бэкапом после восстановления
+            shutil.rmtree(backup_path, ignore_errors=True)
+        return True, None

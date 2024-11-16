@@ -42,3 +42,23 @@ class PostgresqlService:
         except subprocess.CalledProcessError as e:
             return None, f"Ошибка при создании дампа: {e}"
         return output_file, None
+
+    def load_dump(self, connection_string, filepath):
+        try:
+            # Проверяем, что файл существует
+            with open(filepath, 'r'):
+                pass
+        except FileNotFoundError:
+            return False, "Dump file not found"
+        try:
+            # Формируем команду для загрузки дампа с помощью psql
+            psql_path = "/usr/lib/postgresql/17/bin/psql"
+            command = f"{psql_path} {connection_string} -f {filepath}"
+            print("Выполняем команду load", command)
+            # Выполняем команду
+            subprocess.run(command, shell=True, check=True)
+        except subprocess.CalledProcessError as e:
+            return False, f"Ошибка при загрузке дампа: {e}"
+        except Exception as e:
+            return False, f"Неизвестная ошибка: {e}"
+        return True, None
