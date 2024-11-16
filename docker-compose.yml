@@ -5,29 +5,15 @@ volumes:
   static_volume:
 
 services:
-  # nginx:
-  #   build:
-  #     context: .
-  #     dockerfile: ./compose/local/nginx/Dockerfile
-  #   ports:
-  #     - 81:80
-  #   depends_on:
-  #     - web
-  #   volumes:
-  #     - static_volume:/backup_manager/static
-  #   restart: on-failure
-
   web:
     build:
       context: .
-      dockerfile: ./compose/local/django/Dockerfile
+      dockerfile: ./compose/Dockerfile
     volumes:
-      # - ./apps:/traderhub # только для локальной разработки
       - local_db_data:/backup_manager/database
       - static_volume:/backup_manager/static
     ports:
-      - "81:80" # gunicorn
-      - "8009:8009" # gunicorn
+      - "81:80"
     env_file:
       - .envs/.django
     restart: on-failure

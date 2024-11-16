@@ -45,11 +45,11 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # Копируем и настраиваем скрипт запуска
-COPY ./compose/local/django/start /start
+COPY ./compose/start /start
 RUN sed -i 's/\r$//g' /start && chmod +x /start
 
 # Копируем cron файл и настраиваем его
-COPY ./compose/local/django/cronfile /etc/cron.d/dump_cron
+COPY ./compose/cronfile /etc/cron.d/dump_cron
 RUN chmod 0644 /etc/cron.d/dump_cron && crontab /etc/cron.d/dump_cron
 
 # Копируем все файлы приложения
@@ -60,10 +60,10 @@ RUN mkdir -p /backup_manager/logs
 RUN touch /var/log/cron.log
 
 # Копируем конфигурацию nginx
-COPY compose/local/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY compose/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Копируем конфигурацию для supervisord
-COPY compose/local/django/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY compose/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Экспонируем порты
 EXPOSE 80 8009
