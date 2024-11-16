@@ -81,6 +81,10 @@ class UserDatabaseAdmin(ModelAdmin):
                 messages.error(request, f"{db.name} Connection failed!")
 
 
+class DumpTaskOperationInline(admin.TabularInline):
+    model = DumpTaskOperation
+
+
 @admin.register(DumpTask)
 class DumpTaskAdmin(ModelAdmin):
     compressed_fields = True
@@ -89,6 +93,7 @@ class DumpTaskAdmin(ModelAdmin):
     list_fullwidth = False
     list_display = ["id", "created_dt", "database", "file_storage", "task_period", "max_dumpfiles_keep"]
     actions = ['execute_dump']
+    inlines = [DumpTaskOperationInline]
 
     @action(description=_("Execute dump"))
     def execute_dump(self, request: HttpRequest, queryset):
@@ -112,7 +117,7 @@ class DumpTaskOperationAdmin(ModelAdmin):
     warn_unsaved_form = True
     list_filter_submit = False
     list_fullwidth = False
-    list_display = ["id", "created_dt", "task", "status"]
+    list_display = ["id", "created_dt", "task__database", "status"]
     actions = ['reexecute_dump']
 
     @action(description=_("ReExecute dump"))

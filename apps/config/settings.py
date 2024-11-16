@@ -25,11 +25,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-zq##4xr=m6rc+k*x6sck#1%_e!3#_=)0-n^9witrm^f$0d6*rc'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(int(os.environ.get("DEBUG", default=1)))
+DEBUG = bool(int(os.environ.get("DEBUG", default=0)))
 DEFAULT_ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://dev.core.traderhub.ru",
+    "https://core.traderhub.ru",
+    "http://0.0.0.0:8009",
+    "http://0.0.0.0:81",
+    "http://localhost:8009",
+    "http://localhost:81",
+    "http://127.0.0.1:8009",
+    "http://127.0.0.1:81"
+]
 SITE_HOST = os.environ.get("SITE_HOST")
 if SITE_HOST:
     DEFAULT_ALLOWED_HOSTS.append(SITE_HOST)
+    CSRF_TRUSTED_ORIGINS.append(f"http://{SITE_HOST}")
+    CSRF_TRUSTED_ORIGINS.append(f"https://{SITE_HOST}")
 ALLOWED_HOSTS: list = DEFAULT_ALLOWED_HOSTS
 
 
@@ -89,7 +101,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / 'database/db.sqlite3',
     }
 }
 

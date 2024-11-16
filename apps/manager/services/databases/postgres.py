@@ -34,7 +34,7 @@ class PostgresqlService:
         output_file = f"/tmp/dump_{operation_id}.sql"
         try:
             # Формируем команду для pg_dump
-            pg_dump_path = "/usr/lib/postgresql/15/bin/pg_dump"
+            pg_dump_path = "/usr/lib/postgresql/17/bin/pg_dump"
             command = f"{pg_dump_path} {connection_string} -f {output_file}"
             print("Выполняем команду dump")
             # Выполняем команду

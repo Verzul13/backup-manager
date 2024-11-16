@@ -2,36 +2,32 @@ version: '3.3'
 
 volumes:
   local_db_data:
-  local_redis_data:
   static_volume:
-  media_volume:
-  local_rabbitmq_data:
-  quotes_db_data:
 
 services:
-  nginx:
-    build:
-      context: .
-      dockerfile: ./compose/local/nginx/Dockerfile
-    ports:
-      - 81:80
-    depends_on:
-      - web
-    volumes:
-      - static_volume:/backup_manager/static
-      - media_volume:/backup_manager/media
+  # nginx:
+  #   build:
+  #     context: .
+  #     dockerfile: ./compose/local/nginx/Dockerfile
+  #   ports:
+  #     - 81:80
+  #   depends_on:
+  #     - web
+  #   volumes:
+  #     - static_volume:/backup_manager/static
+  #   restart: on-failure
 
   web:
     build:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
     volumes:
-      - ./apps:/traderhub # только для локальной разработки
+      # - ./apps:/traderhub # только для локальной разработки
+      - local_db_data:/backup_manager/database
       - static_volume:/backup_manager/static
-      - media_volume:/backup_manager/media
     ports:
+      - "81:80" # gunicorn
       - "8009:8009" # gunicorn
     env_file:
       - .envs/.django
-    command: /start
     restart: on-failure
