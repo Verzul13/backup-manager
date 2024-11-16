@@ -3,8 +3,8 @@ from django.utils.translation import gettext as _
 
 
 class DBType(IntegerChoices):
-    POSTGRESQL = 1, _('Postgres')
-    CLICKHOUSE = 2, _('ClickHouse')
+    POSTGRESQL = 1, 'Postgres'
+    CLICKHOUSE = 2, 'ClickHouse'
 
 
 class DumpTaskPeriodsChoices(IntegerChoices):

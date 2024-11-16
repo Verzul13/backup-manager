@@ -18,31 +18,31 @@ class AbstractBaseModel(models.Model):
 
 class S3FileStorage(AbstractBaseModel):
     #Fields
-    name = models.CharField("Name", max_length=100)
-    host = models.URLField("Host(https://host/", max_length=300)
-    access_key = models.CharField("Access Key", max_length=300)
-    secret_key = models.CharField("Secret Key", max_length=300)
-    bucket_name = models.CharField("Bucket Name", max_length=300, default='')
+    name = models.CharField(_("Name"), max_length=100)
+    host = models.URLField(_("Host(https://host/"), max_length=300)
+    access_key = models.CharField(_("Access Key"), max_length=300)
+    secret_key = models.CharField(_("Secret Key"), max_length=300)
+    bucket_name = models.CharField(_("Bucket Name"), max_length=300, default='')
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name = 'S3 File Storage'
-        verbose_name_plural = 'S3 File Storages'
+        verbose_name = _('S3 File Storage')
+        verbose_name_plural = _('S3 File Storages')
 
 
 class UserDatabase(AbstractBaseModel):
-    name = models.CharField("Name", max_length=100)
-    db_type = models.IntegerField("Type", choices=DBType.choices)
-    connection_string = models.TextField("Connection Link")
+    name = models.CharField(_("Name"), max_length=100)
+    db_type = models.IntegerField(_("Type"), choices=DBType.choices)
+    connection_string = models.TextField(_("Connection Link"))
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name = 'Database'
-        verbose_name_plural = 'Databases'
+        verbose_name = _('Database')
+        verbose_name_plural = _('Databases')
 
 
 class DumpTask(AbstractBaseModel):
@@ -51,15 +51,15 @@ class DumpTask(AbstractBaseModel):
     file_storage = models.ForeignKey("manager.S3FileStorage", on_delete=models.CASCADE)
 
     # Fields
-    task_period = models.IntegerField("Task Period", choices=DumpTaskPeriodsChoices.choices)
-    max_dumpfiles_keep = models.PositiveIntegerField("Max Dump files count to keep", default=1)
+    task_period = models.IntegerField(_("Task Period"), choices=DumpTaskPeriodsChoices.choices)
+    max_dumpfiles_keep = models.PositiveIntegerField(_("Max Dump files count to keep"), default=1)
 
     def __str__(self):
         return str(self.id)
 
     class Meta:
-        verbose_name = 'Dump Task'
-        verbose_name_plural = 'Dump Tasks'
+        verbose_name = _('Dump Task')
+        verbose_name_plural = _('Dump Tasks')
 
 
 class DumpTaskOperation(AbstractBaseModel):
@@ -67,16 +67,16 @@ class DumpTaskOperation(AbstractBaseModel):
     task = models.ForeignKey("manager.DumpTask", on_delete=models.CASCADE)
 
     # Fields
-    status = models.IntegerField("Status", choices=DumpOperationStatusChoices.choices, default=DumpOperationStatusChoices.CREATED)
-    error_text = models.TextField("Error text", blank=True, default=None, null=True)
-    dump_path = models.CharField("Dump File Path", max_length=250, null=True, blank=True, default=None)
+    status = models.IntegerField(_("Status"), choices=DumpOperationStatusChoices.choices, default=DumpOperationStatusChoices.CREATED)
+    error_text = models.TextField(_("Error text"), blank=True, default=None, null=True)
+    dump_path = models.CharField(_("Dump File Path"), max_length=250, null=True, blank=True, default=None)
 
     def __str__(self):
         return str(self.id)
 
     class Meta:
-        verbose_name = 'Dump Task Operation'
-        verbose_name_plural = 'Dump Tasks Operations'
+        verbose_name = _('Dump Task Operation')
+        verbose_name_plural = _('Dump Tasks Operations')
 
 
 class RecoverBackupOperation(AbstractBaseModel):
@@ -84,12 +84,12 @@ class RecoverBackupOperation(AbstractBaseModel):
     dump_operation = models.ForeignKey("manager.DumpTaskOperation", on_delete=models.CASCADE)
 
     # Fields
-    status = models.IntegerField("Status", choices=DumpOperationStatusChoices.choices, default=DumpOperationStatusChoices.CREATED)
-    error_text = models.TextField("Error text", blank=True, default=None, null=True)
+    status = models.IntegerField(_("Status"), choices=DumpOperationStatusChoices.choices, default=DumpOperationStatusChoices.CREATED)
+    error_text = models.TextField(_("Error text"), blank=True, default=None, null=True)
 
     def __str__(self):
         return str(self.id)
 
     class Meta:
-        verbose_name = 'Recover Backup Operation'
-        verbose_name_plural = 'Recover Backup Operations'
+        verbose_name = _('Recover Backup Operation')
+        verbose_name_plural = _('Recover Backup Operations')

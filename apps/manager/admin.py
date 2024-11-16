@@ -53,10 +53,10 @@ class S3FileStorageAdmin(ModelAdmin):
 
                 # Проверяем доступность, сделав простой запрос (например, list_buckets)
                 s3_client.list_buckets()
-                messages.success(request, f"{storage.name} connection success!")
+                messages.success(request, _(f"{storage.name} connection success!"))
             except ClientError as e:
                 print(f"Connection failed: {e}")
-                messages.error(request, f"{storage.name} Connection failed: {e}")
+                messages.error(request, -(f"{storage.name} Connection failed: {e}"))
         
 
 
@@ -76,9 +76,9 @@ class UserDatabaseAdmin(ModelAdmin):
             db_interface = DB_INTERFACE[db.db_type]()
             is_connected = db_interface.check_connection(db.connection_string)
             if is_connected:
-                messages.success(request, f"{db.name} connection success!")
+                messages.success(request, _(f"{db.name} connection success!"))
             else:
-                messages.error(request, f"{db.name} Connection failed!")
+                messages.error(request, _(f"{db.name} Connection failed!"))
 
 
 class DumpTaskOperationInline(admin.TabularInline):
@@ -102,13 +102,13 @@ class DumpTaskAdmin(ModelAdmin):
             db_interface = DB_INTERFACE[db.db_type]()
             is_connected = db_interface.check_connection(db.connection_string)
             if not is_connected:
-                messages.error(request, f"{task.id}: {db.name} Connection failed!")
+                messages.error(request, _(f"{task.id}: {db.name} Connection failed!"))
                 continue
             new_operation = DumpTaskOperation.objects.create(
                 task=task,
             )
             subprocess.Popen(["python", "manage.py", "dump_operation", str(new_operation.id)])
-            messages.success(request, f"{task.id}: Operation of dump created {new_operation.id}")
+            messages.success(request, _(f"{task.id}: Operation of dump created {new_operation.id}"))
 
 
 @admin.register(DumpTaskOperation)
@@ -131,9 +131,8 @@ class DumpTaskOperationAdmin(ModelAdmin):
             new_restore_operation = RecoverBackupOperation.objects.create(
                 dump_operation=operation
             )
+            subprocess.Popen(["python", "manage.py", "restore_dump", str(new_restore_operation.id)])
             messages.success(request, _(f"Operation of restore dump created {new_restore_operation.id}"))
-            #TODO ADD Restore execute
-
 
 
 @admin.register(RecoverBackupOperation)
@@ -148,5 +147,4 @@ class RecoverBackupOperationAdmin(ModelAdmin):
     @action(description=_("Restore dump"))
     def restore_dump(self, request: HttpRequest, queryset):
         for operation in queryset:
-            pass
-            #TODO ADD Restore execute
+            subprocess.Popen(["python", "manage.py", "restore_dump", str(operation.id)])

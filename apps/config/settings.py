@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 
 from django.templatetags.static import static
+from django.utils.translation import gettext_lazy as _
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -128,13 +129,17 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
+
+
+LANGUAGES = [
+    ('en', 'English'),
+    ('ru', 'Russian'),
+]
+
+LANGUAGE_CODE = os.getenv("LANGUAGE", 'en')
 
 
 # Static files (CSS, JavaScript, Images)
@@ -158,8 +163,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 UNFOLD = {
-    "SITE_TITLE": "Backup Manager",
-    "SITE_HEADER": "Backup Manager",
+    "SITE_TITLE": _("Backup Manager"),
+    "SITE_HEADER": _("Backup Manager"),
     "LOGIN": {
         "image": lambda request: static("manager/img/eb2e92ee45ba62cdcca3f12772ceb6a4.jpg"),
     },
