@@ -29,8 +29,6 @@ SECRET_KEY = 'django-insecure-zq##4xr=m6rc+k*x6sck#1%_e!3#_=)0-n^9witrm^f$0d6*rc
 DEBUG = bool(int(os.environ.get("DEBUG", default=0)))
 DEFAULT_ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
 CSRF_TRUSTED_ORIGINS = [
-    "https://dev.core.traderhub.ru",
-    "https://core.traderhub.ru",
     "http://0.0.0.0:8009",
     "http://0.0.0.0:81",
     "http://localhost:8009",

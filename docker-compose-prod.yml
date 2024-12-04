@@ -1,0 +1,15 @@
+version: '3.3'
+
+volumes:
+  local_db_data:
+
+services:
+  web:
+    image: singleservice/backup-manager:latest
+    volumes:
+      - local_db_data:/backup_manager/database
+    ports:
+      - "81:80"
+    env_file:
+      - .envs/.django
+    restart: on-failure
