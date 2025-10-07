@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-16 02:54-0600\n"
+"POT-Creation-Date: 2025-10-07 04:52-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,176 +19,219 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
 "(n%100>=11 && n%100<=14)? 2 : 3);\n"
-#: manager/admin.py:42 manager/admin.py:73
+
+#: apps/manager/admin.py:41 apps/manager/admin.py:80
 msgid "Check connection"
 msgstr "Проверить соединение"
 
-#: manager/admin.py:56
+#: apps/manager/admin.py:47
 #, python-brace-format
-msgid "{storage.name} connection success!"
+msgid "{storage.name}: Yandex Disk token is empty (secret_key)."
+msgstr ""
+
+#: apps/manager/admin.py:51
+#, python-brace-format
+msgid "{storage.name}: Yandex Disk token is invalid."
+msgstr ""
+
+#: apps/manager/admin.py:54
+#| msgid "{storage.name} connection success!"
+msgid "{storage.name} (Yandex Disk) connection success!"
 msgstr "{storage.name} соеденинение успешно!"
 
-#: manager/admin.py:79
+#: apps/manager/admin.py:64
+#| msgid "{storage.name} connection success!"
+msgid "{storage.name} (S3) connection success!"
+msgstr "{storage.name} соеденинение успешно!"
+
+#: apps/manager/admin.py:66 apps/manager/admin.py:68
+#| msgid "{db.name} Connection failed!"
+msgid "{storage.name} Connection failed: {e}"
+msgstr "{db.name} Соединение не удалось!"
+
+#: apps/manager/admin.py:86
 #, python-brace-format
 msgid "{db.name} connection success!"
 msgstr "{db.name} соеденинение успешно!"
 
-#: manager/admin.py:81
+#: apps/manager/admin.py:88
 #, python-brace-format
 msgid "{db.name} Connection failed!"
 msgstr "{db.name} Соединение не удалось!"
 
-#: manager/admin.py:98
+#: apps/manager/admin.py:106
 msgid "Execute dump"
 msgstr "Выполнить дамп"
 
-#: manager/admin.py:105
+#: apps/manager/admin.py:114
 #, python-brace-format
 msgid "{task.id}: {db.name} Connection failed!"
 msgstr "{task.id}: {db.name} Соединение не удалось!"
 
-#: manager/admin.py:111
+#: apps/manager/admin.py:122
 #, python-brace-format
 msgid "{task.id}: Operation of dump created {new_operation.id}"
 msgstr "{task.id}: Операция дампа создана {new_operation.id}"
 
-#: manager/admin.py:123
+#: apps/manager/admin.py:134
 msgid "ReExecute dump"
 msgstr "Перезапустить дамп"
 
-#: manager/admin.py:128 manager/admin.py:147
+#: apps/manager/admin.py:140 apps/manager/admin.py:162
 msgid "Restore dump"
 msgstr "Восстановить из дампа"
 
-#: manager/admin.py:135
+#: apps/manager/admin.py:149
 #, python-brace-format
 msgid "Operation of restore dump created {new_restore_operation.id}"
 msgstr "Операция восстановления создана {new_restore_operation.id}"
 
-#: manager/choices.py:11
+#: apps/manager/choices.py:11
 msgid "Never"
 msgstr "Никогда"
 
-#: manager/choices.py:12
+#: apps/manager/choices.py:12
 msgid "Every day"
 msgstr "Каждый день"
 
-#: manager/choices.py:13
+#: apps/manager/choices.py:13
 msgid "Every week"
 msgstr "Каждую неделю"
 
-#: manager/choices.py:14
+#: apps/manager/choices.py:14
 msgid "Every month"
 msgstr "Каждый месяц"
 
-#: manager/choices.py:18
+#: apps/manager/choices.py:18
 msgid "Created"
 msgstr "Создана"
 
-#: manager/choices.py:19
+#: apps/manager/choices.py:19
 msgid "In Process"
 msgstr "В процессе"
 
-#: manager/choices.py:20
+#: apps/manager/choices.py:20
 msgid "Fail"
 msgstr "Провал"
 
-#: manager/choices.py:21
+#: apps/manager/choices.py:21
 msgid "Success"
 msgstr "Успешно"
 
-#: manager/models.py:12
+#: apps/manager/models.py:14
 msgid "Date of creation"
 msgstr "Дата создания"
 
-#: manager/models.py:13
+#: apps/manager/models.py:16
 msgid "Date of update"
 msgstr "Дата обновления"
 
-#: manager/models.py:21 manager/models.py:36
+#: apps/manager/models.py:35
+msgid "S3 endpoint (для S3). Для Yandex Disk можно оставить пустым"
+msgstr ""
+
+#: apps/manager/models.py:36
+msgid "S3 bucket (для S3). Для Yandex Disk не используется"
+msgstr ""
+
+#: apps/manager/models.py:37
+msgid "S3 Access Key (для S3)"
+msgstr ""
+
+#: apps/manager/models.py:38
+msgid "S3 Secret Key ИЛИ OAuth-токен (для Yandex Disk)"
+msgstr ""
+
+#: apps/manager/models.py:43
+#| msgid "File Storage"
+msgid "File storage"
+msgstr "Хранилище"
+
+#: apps/manager/models.py:44
+#| msgid "File Storages"
+msgid "File storages"
+msgstr "Хранилища"
+
+#: apps/manager/models.py:63
+msgid "Required for S3"
+msgstr ""
+
+#: apps/manager/models.py:68
+msgid "OAuth token is required for Yandex Disk"
+msgstr ""
+
+#: apps/manager/models.py:72
 msgid "Name"
 msgstr "Наименование"
 
-#: manager/models.py:22
-msgid "Host(https://host/"
-msgstr "Хост(https://host/"
-
-#: manager/models.py:23
-msgid "Access Key"
-msgstr "Ключ доступа"
-
-#: manager/models.py:24
-msgid "Secret Key"
-msgstr "Секретеый ключ"
-
-#: manager/models.py:25
-msgid "Bucket Name"
-msgstr "Наименование бакета"
-
-#: manager/models.py:31
-msgid "S3 File Storage"
-msgstr "Хранилище S3"
-
-#: manager/models.py:32
-msgid "S3 File Storages"
-msgstr "Хранилища S3"
-
-#: manager/models.py:37
+#: apps/manager/models.py:73
 msgid "Type"
 msgstr "Тип"
 
-#: manager/models.py:38
+#: apps/manager/models.py:74
 msgid "Connection Link"
 msgstr "Ссылка подключения"
 
-#: manager/models.py:44
+#: apps/manager/models.py:80
 msgid "Database"
 msgstr "База данных"
 
-#: manager/models.py:45
+#: apps/manager/models.py:81
 msgid "Databases"
 msgstr "Базы данных"
 
-#: manager/models.py:54
+#: apps/manager/models.py:93
 msgid "Task Period"
 msgstr "Периодичность"
 
-#: manager/models.py:55
+#: apps/manager/models.py:95
 msgid "Max Dump files count to keep"
 msgstr "Макс. количество дампов для хранения"
 
-#: manager/models.py:61
+#: apps/manager/models.py:101
 msgid "Dump Task"
 msgstr "Задача на дамп"
 
-#: manager/models.py:62
+#: apps/manager/models.py:102
 msgid "Dump Tasks"
 msgstr "Задачи на дамп"
 
-#: manager/models.py:70 manager/models.py:87
+#: apps/manager/models.py:111 apps/manager/models.py:132
 msgid "Status"
 msgstr "Статус"
 
-#: manager/models.py:71 manager/models.py:88
+#: apps/manager/models.py:113 apps/manager/models.py:134
 msgid "Error text"
 msgstr "Текст ошибки"
 
-#: manager/models.py:72
+#: apps/manager/models.py:115
 msgid "Dump File Path"
 msgstr "Путь к файлу дампа"
 
-#: manager/models.py:78
+#: apps/manager/models.py:121
 msgid "Dump Task Operation"
 msgstr "Операция дампа"
 
-#: manager/models.py:79
+#: apps/manager/models.py:122
 msgid "Dump Tasks Operations"
 msgstr "Операции дампа"
 
-#: manager/models.py:94
+#: apps/manager/models.py:140
 msgid "Recover Backup Operation"
 msgstr "Операция восстановления"
 
-#: manager/models.py:95
+#: apps/manager/models.py:141
 msgid "Recover Backup Operations"
 msgstr "Операции восстановления"
+
+#~ msgid "Host(https://host/"
+#~ msgstr "Хост(https://host/"
+
+#~ msgid "Access Key"
+#~ msgstr "Ключ доступа"
+
+#~ msgid "Secret Key"
+#~ msgstr "Секретеый ключ"
+
+#~ msgid "Bucket Name"
+#~ msgstr "Наименование бакета"

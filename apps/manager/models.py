@@ -2,34 +2,74 @@ import uuid
 
 from django.db import models
 from django.utils.translation import gettext as _
+from django.core.exceptions import ValidationError
 
 from manager.choices import DBType, DumpTaskPeriodsChoices, DumpOperationStatusChoices
 
 
 class AbstractBaseModel(models.Model):
     # Fields
-    id = models.CharField(primary_key=True, default=uuid.uuid4, editable=False, max_length=100, db_index=True)
-    created_dt = models.DateTimeField(_('Date of creation'), auto_now_add=True, editable=False)
-    updated_dt = models.DateTimeField(_('Date of update'), auto_now=True, editable=True)
+    id = models.CharField(primary_key=True, default=uuid.uuid4,
+                          editable=False, max_length=100, db_index=True)
+    created_dt = models.DateTimeField(
+        _('Date of creation'), auto_now_add=True, editable=False)
+    updated_dt = models.DateTimeField(
+        _('Date of update'), auto_now=True, editable=True)
 
     class Meta:
         abstract = True
 
 
-class S3FileStorage(AbstractBaseModel):
-    #Fields
-    name = models.CharField(_("Name"), max_length=100)
-    host = models.URLField(_("Host(https://host/"), max_length=300)
-    access_key = models.CharField(_("Access Key"), max_length=300)
-    secret_key = models.CharField(_("Secret Key"), max_length=300)
-    bucket_name = models.CharField(_("Bucket Name"), max_length=300, default='')
+class FileStorage(models.Model):
+    TYPE_S3 = "s3"
+    TYPE_YADISK = "yadisk"
+    TYPE_CHOICES = (
+        (TYPE_S3, "S3"),
+        (TYPE_YADISK, "Yandex Disk"),
+    )
 
-    def __str__(self):
-        return self.name
+    name = models.CharField(max_length=255, unique=True)
+    type = models.CharField(
+        max_length=10, choices=TYPE_CHOICES, default=TYPE_S3)
+
+    # Поля «как раньше»
+    host = models.URLField(blank=True, null=True, help_text=_(
+        "S3 endpoint (для S3). Для Yandex Disk можно оставить пустым"))
+    bucket_name = models.CharField(max_length=255, blank=True, null=True, help_text=_(
+        "S3 bucket (для S3). Для Yandex Disk не используется"))
+    access_key = models.CharField(max_length=255, blank=True, null=True, help_text=_("S3 Access Key (для S3)"))
+    secret_key = models.CharField(max_length=255, blank=True, null=True,
+                                  help_text=_("S3 Secret Key ИЛИ OAuth-токен (для Yandex Disk)"))
+
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = _('S3 File Storage')
-        verbose_name_plural = _('S3 File Storages')
+        verbose_name = _("File storage")
+        verbose_name_plural = _("File storages")
+
+    def __str__(self):
+        return f"{self.name} [{self.get_type_display()}]"
+
+    def clean(self):
+        # Валидация по типу
+        t = (self.type or "").lower()
+        if t == self.TYPE_S3:
+            missing = []
+            if not self.host:
+                missing.append("host")
+            if not self.bucket_name:
+                missing.append("bucket_name")
+            if not self.access_key:
+                missing.append("access_key")
+            if not self.secret_key:
+                missing.append("secret_key")
+            if missing:
+                raise ValidationError({f: _("Required for S3")
+                                      for f in missing})
+        elif t == self.TYPE_YADISK:
+            if not self.secret_key:
+                raise ValidationError(
+                    {"secret_key": _("OAuth token is required for Yandex Disk")})
 
 
 class UserDatabase(AbstractBaseModel):
@@ -47,12 +87,16 @@ class UserDatabase(AbstractBaseModel):
 
 class DumpTask(AbstractBaseModel):
     # Relations
-    database = models.ForeignKey("manager.UserDatabase", on_delete=models.CASCADE)
-    file_storage = models.ForeignKey("manager.S3FileStorage", on_delete=models.CASCADE)
+    database = models.ForeignKey(
+        "manager.UserDatabase", on_delete=models.CASCADE)
+    file_storage = models.ForeignKey(
+        "manager.FileStorage", on_delete=models.CASCADE)
 
     # Fields
-    task_period = models.IntegerField(_("Task Period"), choices=DumpTaskPeriodsChoices.choices)
-    max_dumpfiles_keep = models.PositiveIntegerField(_("Max Dump files count to keep"), default=1)
+    task_period = models.IntegerField(
+        _("Task Period"), choices=DumpTaskPeriodsChoices.choices)
+    max_dumpfiles_keep = models.PositiveIntegerField(
+        _("Max Dump files count to keep"), default=1)
 
     def __str__(self):
         return str(self.id)
@@ -67,9 +111,12 @@ class DumpTaskOperation(AbstractBaseModel):
     task = models.ForeignKey("manager.DumpTask", on_delete=models.CASCADE)
 
     # Fields
-    status = models.IntegerField(_("Status"), choices=DumpOperationStatusChoices.choices, default=DumpOperationStatusChoices.CREATED)
-    error_text = models.TextField(_("Error text"), blank=True, default=None, null=True)
-    dump_path = models.CharField(_("Dump File Path"), max_length=250, null=True, blank=True, default=None)
+    status = models.IntegerField(
+        _("Status"), choices=DumpOperationStatusChoices.choices, default=DumpOperationStatusChoices.CREATED)
+    error_text = models.TextField(
+        _("Error text"), blank=True, default=None, null=True)
+    dump_path = models.CharField(
+        _("Dump File Path"), max_length=250, null=True, blank=True, default=None)
 
     def __str__(self):
         return str(self.id)
@@ -81,11 +128,14 @@ class DumpTaskOperation(AbstractBaseModel):
 
 class RecoverBackupOperation(AbstractBaseModel):
     # Relations
-    dump_operation = models.ForeignKey("manager.DumpTaskOperation", on_delete=models.CASCADE)
+    dump_operation = models.ForeignKey(
+        "manager.DumpTaskOperation", on_delete=models.CASCADE)
 
     # Fields
-    status = models.IntegerField(_("Status"), choices=DumpOperationStatusChoices.choices, default=DumpOperationStatusChoices.CREATED)
-    error_text = models.TextField(_("Error text"), blank=True, default=None, null=True)
+    status = models.IntegerField(
+        _("Status"), choices=DumpOperationStatusChoices.choices, default=DumpOperationStatusChoices.CREATED)
+    error_text = models.TextField(
+        _("Error text"), blank=True, default=None, null=True)
 
     def __str__(self):
         return str(self.id)

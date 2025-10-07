@@ -1,20 +1,29 @@
 # Базовый образ
-FROM python:3.12
+FROM python:3.12-bookworm
 
-# Отключаем буферизацию и записывание байт-кода
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
+# Небуферизованный вывод и без .pyc
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    DEBIAN_FRONTEND=noninteractive
 
-# Устанавливаем зависимости для Python и системы, включая PostgreSQL 17
-RUN apt-get update && apt-get install -y \
+# Базовые утилиты (включая ca-certificates и gpg)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
     wget \
-    gnupg2 \
-    lsb-release
+    gnupg \
+    lsb-release \
+ && rm -rf /var/lib/apt/lists/*
 
-# Добавляем репозиторий PostgreSQL 17 и устанавливаем его
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
-    && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
-    && apt-get update && apt-get install -y \
+# Подключаем официальный репозиторий PostgreSQL 17 через keyring
+RUN install -d -m 0755 /etc/apt/keyrings \
+ && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+    | gpg --dearmor -o /etc/apt/keyrings/postgresql.gpg \
+ && echo "deb [signed-by=/etc/apt/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" \
+    > /etc/apt/sources.list.d/pgdg.list
+
+# Ставим системные зависимости и Postgres 17
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     git \
@@ -25,48 +34,45 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg m
     cron \
     nginx \
     supervisor \
-    postgresql-17 postgresql-client-17 \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    postgresql-17 \
+    postgresql-client-17 \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Устанавливаем clickhouse-backup
-RUN wget https://github.com/Altinity/clickhouse-backup/releases/download/v2.6.3/clickhouse-backup-linux-amd64.tar.gz \
-    && tar -zxvf clickhouse-backup-linux-amd64.tar.gz \
-    && mv build/linux/amd64/clickhouse-backup /usr/local/bin/clickhouse-backup \
-    && rm -f clickhouse-backup-linux-amd64.tar.gz \
-    && mkdir -p /etc/clickhouse-backup
+RUN wget -q https://github.com/Altinity/clickhouse-backup/releases/download/v2.6.3/clickhouse-backup-linux-amd64.tar.gz \
+ && tar -zxf clickhouse-backup-linux-amd64.tar.gz \
+ && mv build/linux/amd64/clickhouse-backup /usr/local/bin/clickhouse-backup \
+ && rm -rf clickhouse-backup-linux-amd64.tar.gz build \
+ && mkdir -p /etc/clickhouse-backup
 
-# Устанавливаем рабочую директорию
+# Рабочая директория
 ENV HOME=/backup_manager/
 WORKDIR $HOME
 
-# Копируем requirements и устанавливаем зависимости
+# Python-зависимости
 COPY requirements.txt requirements.txt
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Копируем и настраиваем скрипт запуска
+# Скрипт запуска
 COPY ./compose/start /start
 RUN sed -i 's/\r$//g' /start && chmod +x /start
 
-# Копируем cron файл и настраиваем его
+# Cron
 COPY ./compose/cronfile /etc/cron.d/dump_cron
 RUN chmod 0644 /etc/cron.d/dump_cron && crontab /etc/cron.d/dump_cron
 
-# Копируем все файлы приложения
+# Приложение
 COPY ./apps .
 
-# Настройка логов и директорий
-RUN mkdir -p /backup_manager/logs
-RUN touch /var/log/cron.log
+# Логи/директории
+RUN mkdir -p /backup_manager/logs && touch /var/log/cron.log
 
-# Копируем конфигурацию nginx
+# Nginx и Supervisor
 COPY compose/nginx.conf /etc/nginx/conf.d/default.conf
-
-# Копируем конфигурацию для supervisord
 COPY compose/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Экспонируем порты
+# Порты
 EXPOSE 80 8009
 
-# Запуск supervisord
+# Старт
 CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
